@@ -1,0 +1,31 @@
+{
+  "server": {
+    "port": 3100,
+    "host": "0.0.0.0"
+  },
+  "account": {
+    "username": "0812345678",
+    "password": "CHANGE_ME",
+    "countryCode": "66"
+  },
+  "auth": {
+    "loginUrl": "https://pa.account.tcl.com/account/login?clientId=54148614",
+    "cloudUrlsEndpoint": "https://prod-center.aws.tcljd.com/v3/global/cloud_url_get",
+    "haAppId": "wx6e1af3fa84fbe523",
+    "clientId": "54148614",
+    "sessionFile": "./session.json",
+    "refreshThreshold": 0.1
+  },
+  "iot": {
+    "host": "sgp-iot-api-prod.tcljd.com",
+    "appId": "f6hek6hdpt64jrw596",
+    "deviceId": "YOUR_DEVICE_ID",
+    "countryCode": "TH",
+    "timezone": "Asia/Bangkok",
+    "region": "ap-southeast-1",
+    "cognitoHost": "cognito-identity.ap-southeast-1.amazonaws.com",
+    "tempMin": 16,
+    "tempMax": 30,
+    "tempStep": 1
+  }
+}

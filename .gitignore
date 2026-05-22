@@ -1,0 +1,21 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.Python
+
+# secrets / runtime
+tcl_ts_api/config.json
+tcl_ts_api/session.json
+.session.json
+
+# JS/TS
+node_modules/
+dist/
+out/
+*.tsbuildinfo
+
+# IDE / OS
+.idea/
+.DS_Store

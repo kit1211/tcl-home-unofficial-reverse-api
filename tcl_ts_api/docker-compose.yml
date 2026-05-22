@@ -1,0 +1,15 @@
+services:
+  tcl_ts_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tcl_ts_api
+    ports:
+      - "${PORT:-3100}:3100"
+    volumes:
+      - ./config.json:/usr/src/app/config.json:ro
+      - tcl_session:/usr/src/app/persist
+    restart: unless-stopped
+
+volumes:
+  tcl_session:

@@ -1,0 +1,10 @@
+{
+  "username": "0812345678",
+  "login_account": "+66812345678",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.EXAMPLE.PAYLOAD",
+  "refresh_token": "example_refresh_token",
+  "user_id": "example_user_id",
+  "cloud_url": "https://example-cloud.aws.tcljd.com",
+  "cloud_region": "ap-southeast-1",
+  "auth_flow": "ha"
+}

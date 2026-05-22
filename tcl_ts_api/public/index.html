@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TCL Home Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script>
+      (function () {
+        const saved = localStorage.getItem("theme");
+        const theme =
+          saved === "light" || saved === "dark"
+            ? saved
+            : window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">TCL</span>
+        <div>
+          <h1>Home Control</h1>
+          <p class="subtitle">ควบคุมแอร์ผ่าน API ที่แกะมาจาก TCL Home</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span class="conn-badge" id="connBadge" data-state="idle">—</span>
+        <button type="button" class="icon-btn" id="themeToggle" aria-label="สลับโหมดสี">
+          <span class="theme-icon theme-icon--sun">☀</span>
+          <span class="theme-icon theme-icon--moon">☾</span>
+        </button>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button type="button" class="tab active" data-tab="control" role="tab" aria-selected="true">
+        ควบคุม
+      </button>
+      <button type="button" class="tab" data-tab="docs" role="tab" aria-selected="false">API Docs</button>
+    </nav>
+
+    <main>
+      <section class="panel active" id="panel-control" role="tabpanel">
+        <div class="devices-grid" id="devicesGrid">
+          <p class="loading-msg">กำลังโหลดอุปกรณ์…</p>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-docs" role="tabpanel" hidden>
+        <article class="docs-card">
+          <h2>REST API</h2>
+          <p class="docs-lead">
+            API นี้ห่อ TCL Home auth + AWS IoT shadow ไว้เป็น HTTP ธรรมดา — ใช้จาก curl, Home Assistant,
+            Node-RED หรือ automation อื่นได้
+          </p>
+
+          <div class="endpoint" data-method="GET">
+            <div class="endpoint-head">
+              <span class="method get">GET</span>
+              <code>/api/devices</code>
+            </div>
+            <p>รายการอุปกรณ์ที่ตั้งค่าไว้ใน <code>config.json</code></p>
+            <pre><code>curl http://localhost:3100/api/devices</code></pre>
+          </div>
+
+          <div class="endpoint" data-method="GET">
+            <div class="endpoint-head">
+              <span class="method get">GET</span>
+              <code>/api/ac/status</code>
+            </div>
+            <p>อ่านสถานะแอร์จาก device shadow — เปิด/ปิด, อุณหภูมิเป้าหมาย, อุณหภูมิห้อง</p>
+            <pre><code>curl http://localhost:3100/api/ac/status</code></pre>
+          </div>
+
+          <div class="endpoint" data-method="POST">
+            <div class="endpoint-head">
+              <span class="method post">POST</span>
+              <code>/api/ac/power</code>
+            </div>
+            <p>เปิดหรือปิดแอร์</p>
+            <pre><code>curl -X POST http://localhost:3100/api/ac/power \
+  -H 'Content-Type: application/json' \
+  -d '{"on": true}'</code></pre>
+          </div>
+
+          <div class="endpoint" data-method="POST">
+            <div class="endpoint-head">
+              <span class="method post">POST</span>
+              <code>/api/ac/temperature</code>
+            </div>
+            <p>ตั้งอุณหภูมิเป้าหมาย — ส่ง <code>value</code> (ค่าเต็ม) หรือ <code>delta</code> (+/- 1)</p>
+            <pre><code># ตั้งเป็น 25°C
+curl -X POST http://localhost:3100/api/ac/temperature \
+  -H 'Content-Type: application/json' \
+  -d '{"value": 25}'
+
+# ลด 1 องศา
+curl -X POST http://localhost:3100/api/ac/temperature \
+  -H 'Content-Type: application/json' \
+  -d '{"delta": -1}'</code></pre>
+          </div>
+
+          <div class="endpoint" data-method="GET">
+            <div class="endpoint-head">
+              <span class="method get">GET</span>
+              <code>/health</code>
+            </div>
+            <p>Health check สำหรับ Docker / monitoring</p>
+            <pre><code>curl http://localhost:3100/health</code></pre>
+          </div>
+
+          <div class="docs-note">
+            <strong>หมายเหตุ:</strong> session login เก็บอัตโนมัติใน <code>session.json</code> — ไม่ต้องส่ง token
+            เองทุก request
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span id="lastUpdated">—</span>
+      <button type="button" class="text-btn" id="refreshBtn">รีเฟรช</button>
+    </footer>
+
+    <template id="deviceCardTpl">
+      <article class="device-card" data-device-id="">
+        <div class="device-head">
+          <div class="device-icon" aria-hidden="true">❄</div>
+          <div>
+            <h2 class="device-label"></h2>
+            <p class="device-id"></p>
+          </div>
+          <label class="power-switch">
+            <input type="checkbox" class="power-input" />
+            <span class="power-track"><span class="power-thumb"></span></span>
+            <span class="power-text">ปิด</span>
+          </label>
+        </div>
+
+        <div class="temp-display">
+          <div class="temp-block">
+            <span class="temp-label">ในห้อง</span>
+            <span class="temp-value temp-room">—</span>
+            <span class="temp-unit">°C</span>
+          </div>
+          <div class="temp-divider"></div>
+          <div class="temp-block temp-block--target">
+            <span class="temp-label">ตั้งไว้</span>
+            <span class="temp-value temp-target">—</span>
+            <span class="temp-unit">°C</span>
+          </div>
+        </div>
+
+        <div class="temp-controls">
+          <button type="button" class="temp-btn temp-down" aria-label="ลดอุณหภูมิ">−</button>
+          <input type="range" class="temp-slider" />
+          <button type="button" class="temp-btn temp-up" aria-label="เพิ่มอุณหภูมิ">+</button>
+        </div>
+
+        <div class="device-meta">
+          <span class="meta-chip meta-mode">—</span>
+          <span class="meta-chip meta-state">—</span>
+        </div>
+
+        <p class="device-error" hidden></p>
+      </article>
+    </template>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
